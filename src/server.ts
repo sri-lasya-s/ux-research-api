@@ -51,8 +51,8 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(undefined, {
 
 app.use((req, res) => api.handleRequest(req as any, req, res));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`UX Research API running on http://localhost:${PORT}`);
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`UX Research API running on port ${PORT}`);
   console.log(`Swagger UI available at http://localhost:${PORT}/docs`);
 });
