@@ -1,0 +1,241 @@
+# Info Block: Who are you? What is this API?
+# Servers Block: Where does this API live?
+# Paths Block: What endpoints exist? What do they do?
+# Components Block: What does the data look like?
+
+openapi: "3.1.0"
+
+info:
+  title: UX Research Study API
+  description: An API for managing UX research studies
+  version: "1.0.0"
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /:
+    get:
+      operationId: StudyService_list
+      summary: List all studies
+      description: Returns a list of all UX research studies
+      tags:
+        - Studies
+      responses:
+        "200":
+          description: A list of studies retrieved successfully
+        "400":
+          description: Bad request
+    post:
+      operationId: StudyService_create
+      summary: Create a new study
+      description: Creates a new UX research study
+      tags:
+        - Studies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyCreate"
+      responses:
+        "201":
+          description: Study created successfully
+        "400":
+          description: Bad request
+
+  /{id}:
+    get:
+      operationId: StudyService_get
+      summary: Get a study by ID
+      description: Returns a single UX research study by its ID
+      tags:
+        - Studies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the study
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Study retrieved successfully
+        "400":
+          description: Bad request
+        "404":
+          description: Study not found
+    patch:
+      operationId: StudyService_update
+      summary: Update a study
+      description: Partially updates an existing UX research study
+      tags:
+        - Studies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the study
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyUpdate"
+      responses:
+        "200":
+          description: Study updated successfully
+        "400":
+          description: Bad request
+        "404":
+          description: Study not found
+    delete:
+      operationId: StudyService_delete
+      summary: Delete a study
+      description: Deletes a UX research study by its ID
+      tags:
+        - Studies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the study
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Study deleted successfully
+        "400":
+          description: Bad request
+        "404":
+          description: Study not found
+
+  /summary:
+    get:
+      operationId: StudyService_summary
+      summary: Get studies summary
+      description: Returns aggregated statistics about all UX research studies including total count, average duration, and breakdown by status and study type
+      tags:
+        - Studies
+      responses:
+        "200":
+          description: Summary retrieved successfully
+        "400":
+          description: Bad request
+
+components:
+  schemas:
+    Study:
+      type: object
+      description: A UX research study
+      required:
+        - id
+        - title
+        - studyType
+        - status
+        - researcherName
+        - durationMinutes
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Auto-generated unique identifier
+        title:
+          type: string
+          description: Name of the study
+        studyType:
+          type: string
+          enum:
+            - Usability
+            - Interview
+            - Survey
+            - A/B Test
+          description: Type of the UX research study
+        status:
+          type: string
+          enum:
+            - Planned
+            - Active
+            - Completed
+          description: Current status of the study
+        researcherName:
+          type: string
+          description: Name of the researcher running the study
+        durationMinutes:
+          type: integer
+          description: Duration of each session in minutes
+        notes:
+          type: string
+          description: Any additional notes about the study
+
+    StudyCreate:
+      type: object
+      description: Data required to create a new UX research study
+      required:
+        - title
+        - studyType
+        - status
+        - researcherName
+        - durationMinutes
+      properties:
+        title:
+          type: string
+          description: Name of the study
+        studyType:
+          type: string
+          enum:
+            - Usability
+            - Interview
+            - Survey
+            - A/B Test
+          description: Type of the UX research study
+        status:
+          type: string
+          enum:
+            - Planned
+            - Active
+            - Completed
+          description: Current status of the study
+        researcherName:
+          type: string
+          description: Name of the researcher running the study
+        durationMinutes:
+          type: integer
+          description: Duration of each session in minutes
+        notes:
+          type: string
+          description: Any additional notes about the study
+
+    StudyUpdate:
+      type: object
+      description: Data for partially updating an existing UX research study
+      properties:
+        title:
+          type: string
+          description: Name of the study
+        studyType:
+          type: string
+          enum:
+            - Usability
+            - Interview
+            - Survey
+            - A/B Test
+          description: Type of the UX research study
+        status:
+          type: string
+          enum:
+            - Planned
+            - Active
+            - Completed
+          description: Current status of the study
+        researcherName:
+          type: string
+          description: Name of the researcher running the study
+        durationMinutes:
+          type: integer
+          description: Duration of each session in minutes
+        notes:
+          type: string
+          description: Any additional notes about the study
