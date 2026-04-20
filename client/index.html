@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UX Research Studies</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    h1 { color: #333; }
+    button { padding: 8px 16px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+    button.delete { background: #dc3545; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #f4f4f4; }
+    input, select, textarea { padding: 8px; margin: 5px; width: 200px; border: 1px solid #ddd; border-radius: 4px; }
+    .form-section { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .summary-box { background: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    #message { padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <h1>UX Research Studies</h1>
+
+  <div id="message" style="display:none"></div>
+
+  <h2>All Studies</h2>
+  <button onclick="loadStudies()">Refresh Studies</button>
+  <table id="studies-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Researcher</th>
+        <th>Duration</th>
+        <th>Notes</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="studies-body"></tbody>
+  </table>
+
+  <div class="form-section">
+    <h2>Create New Study</h2>
+    <input id="title" placeholder="Title" /><br>
+    <select id="studyType">
+      <option value="Usability">Usability</option>
+      <option value="Interview">Interview</option>
+      <option value="Survey">Survey</option>
+      <option value="A/B Test">A/B Test</option>
+    </select>
+    <select id="status">
+      <option value="Planned">Planned</option>
+      <option value="Active">Active</option>
+      <option value="Completed">Completed</option>
+    </select><br>
+    <input id="researcherName" placeholder="Researcher Name" />
+    <input id="durationMinutes" type="number" placeholder="Duration (minutes)" /><br>
+    <textarea id="notes" placeholder="Notes"></textarea><br>
+    <button onclick="createStudy()">Create Study</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-box">
+    <h2>Studies Summary</h2>
+    <button onclick="loadSummary()">Get Summary</button>
+    <div id="summary-content"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://ux-research-api.azurewebsites.net';
+
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = type;
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+
+    async function loadStudies() {
+      const res = await fetch(`${API_URL}/`);
+      const studies = await res.json();
+      const tbody = document.getElementById('studies-body');
+      tbody.innerHTML = '';
+      studies.forEach(s => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${s.title}</td>
+            <td>${s.studyType}</td>
+            <td>${s.status}</td>
+            <td>${s.researcherName}</td>
+            <td>${s.durationMinutes} mins</td>
+            <td>${s.notes || '-'}</td>
+            <td><button class="delete" onclick="deleteStudy('${s.id}')">Delete</button></td>
+          </tr>`;
+      });
+    }
+
+    async function createStudy() {
+      const body = {
+        title: document.getElementById('title').value,
+        studyType: document.getElementById('studyType').value,
+        status: document.getElementById('status').value,
+        researcherName: document.getElementById('researcherName').value,
+        durationMinutes: parseInt(document.getElementById('durationMinutes').value),
+        notes: document.getElementById('notes').value
+      };
+      const res = await fetch(`${API_URL}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        showMessage('Study created successfully!', 'success');
+        loadStudies();
+      } else {
+        showMessage('Error creating study!', 'error');
+      }
+    }
+
+    async function deleteStudy(id) {
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showMessage('Study deleted successfully!', 'success');
+        loadStudies();
+      } else {
+        showMessage('Error deleting study!', 'error');
+      }
+    }
+
+    async function loadSummary() {
+      const res = await fetch(`${API_URL}/summary`);
+      const data = await res.json();
+      document.getElementById('summary-content').innerHTML = `
+        <p><strong>Total Studies:</strong> ${data.totalStudies}</p>
+        <p><strong>Average Duration:</strong> ${data.averageDuration} mins</p>
+        <p><strong>By Status:</strong> Planned: ${data.byStatus.Planned}, Active: ${data.byStatus.Active}, Completed: ${data.byStatus.Completed}</p>
+        <p><strong>By Type:</strong> Usability: ${data.byStudyType.Usability}, Interview: ${data.byStudyType.Interview}, Survey: ${data.byStudyType.Survey}, A/B Test: ${data.byStudyType["A/B Test"]}</p>
+      `;
+    }
+
+    loadStudies();
+  </script>
+</body>
+</html>
