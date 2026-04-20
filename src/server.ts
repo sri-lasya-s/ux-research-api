@@ -1,4 +1,5 @@
 import cors from "cors";
+import clientApiRouter from "./client-api";
 import express from "express";
 import OpenAPIBackend from "openapi-backend";
 import swaggerUi from "swagger-ui-express";
@@ -15,6 +16,8 @@ import { StudyService_summary } from "./handlers/StudyService_summary";
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use("/client-api", clientApiRouter);
+app.use("/client", express.static(path.join(__dirname, "../client")));
 
 const specPath = path.join(__dirname, "..", "openapi.yaml");
 
