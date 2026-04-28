@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Contract-first UX Research Study API",
   "main": "dist/server.js",
-  "scripts": {
-    "dev": "ts-node src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
-  },
+"scripts": {
+  "dev": "ts-node src/server.ts",
+  "build": "tsc",
+  "start": "node dist/server.js"
+},
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",
     "@types/cors": "^2.8.19",
