@@ -25,7 +25,7 @@ api.init();
 app.get("/openapi.yaml", (_req, res) => res.setHeader("Content-Type", "text/yaml").send(fs.readFileSync(specPath, "utf-8")));
 app.get("/openapi.json", (_req, res) => res.json(api.document));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: "/openapi.yaml" } }));
-
+app.use("/client", express.static(path.join(__dirname, "..", "client")));
 app.use((req, res) => api.handleRequest(req as any, req, res));
 
 const PORT = process.env.PORT || 3000;
