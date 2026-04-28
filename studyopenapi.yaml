@@ -8,6 +8,10 @@ info:
     name: UX Research API
 
 servers:
+
+  - url: https://backend-ux.azurewebsites.net
+    description: Azure production server
+
   - url: http://localhost:3000
     description: Local development server
 
