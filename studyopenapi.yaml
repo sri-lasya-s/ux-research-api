@@ -1,0 +1,290 @@
+openapi: "3.1.0"
+
+info:
+  title: UX Research Study Service
+  description: Manage UX research studies including usability tests, interviews, and surveys.
+  version: "1.0.0"
+  contact:
+    name: UX Research API
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Studies
+    description: CRUD operations for UX research studies
+
+paths:
+  /:
+    get:
+      operationId: StudyService_list
+      tags: [Studies]
+      summary: List all studies
+      description: Returns an array of all UX research studies in the system.
+      responses:
+        "200":
+          description: A list of studies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Study"
+
+    post:
+      operationId: StudyService_create
+      tags: [Studies]
+      summary: Create a study
+      description: Creates a new UX research study and returns it with an auto-generated ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyCreate"
+      responses:
+        "201":
+          description: Study created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Study"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /summary:
+    get:
+      operationId: StudyService_summary
+      tags: [Studies]
+      summary: Get research summary statistics
+      description: Returns aggregated stats — total studies, average participants, and a count breakdown by methodology.
+      responses:
+        "200":
+          description: Summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Summary"
+
+  /{id}:
+    get:
+      operationId: StudyService_get
+      tags: [Studies]
+      summary: Get a study by ID
+      description: Returns a single study matching the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the study
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The study
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Study"
+        "404":
+          description: Study not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    patch:
+      operationId: StudyService_update
+      tags: [Studies]
+      summary: Partially update a study
+      description: Updates only the provided fields on an existing study.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the study
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyUpdate"
+      responses:
+        "200":
+          description: Updated study
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Study"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Study not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      operationId: StudyService_delete
+      tags: [Studies]
+      summary: Delete a study
+      description: Permanently removes a study from the system.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the study
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Study deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "404":
+          description: Study not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Study:
+      type: object
+      description: A UX research study record.
+      required: [id, title, methodology, status, participantCount, durationMinutes, researcherName]
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Auto-generated unique identifier
+        title:
+          type: string
+          description: Title of the research study
+        methodology:
+          type: string
+          description: The research method used
+          enum: [Usability Testing, Interview, Survey, Card Sorting, A/B Testing]
+        status:
+          type: string
+          description: Current status of the study
+          enum: [Planned, In Progress, Completed]
+        participantCount:
+          type: integer
+          format: int32
+          description: Number of participants in the study
+        durationMinutes:
+          type: integer
+          format: int32
+          description: Duration of each session in minutes
+        researcherName:
+          type: string
+          description: Name of the lead researcher
+      example:
+        id: "abc123"
+        title: "Mobile Checkout Flow Study"
+        methodology: "Usability Testing"
+        status: "In Progress"
+        participantCount: 12
+        durationMinutes: 45
+        researcherName: "Jane Smith"
+
+    StudyCreate:
+      type: object
+      description: Fields required to create a new study. ID is auto-generated.
+      required: [title, methodology, status, participantCount, durationMinutes, researcherName]
+      properties:
+        title:
+          type: string
+          description: Title of the research study
+        methodology:
+          type: string
+          enum: [Usability Testing, Interview, Survey, Card Sorting, A/B Testing]
+          description: The research method used
+        status:
+          type: string
+          enum: [Planned, In Progress, Completed]
+          description: Current status of the study
+        participantCount:
+          type: integer
+          format: int32
+          description: Number of participants
+        durationMinutes:
+          type: integer
+          format: int32
+          description: Duration of each session in minutes
+        researcherName:
+          type: string
+          description: Name of the lead researcher
+
+    StudyUpdate:
+      type: object
+      description: All fields optional — only provided fields will be updated.
+      properties:
+        title:
+          type: string
+          description: Title of the research study
+        methodology:
+          type: string
+          enum: [Usability Testing, Interview, Survey, Card Sorting, A/B Testing]
+          description: The research method used
+        status:
+          type: string
+          enum: [Planned, In Progress, Completed]
+          description: Current status of the study
+        participantCount:
+          type: integer
+          format: int32
+          description: Number of participants
+        durationMinutes:
+          type: integer
+          format: int32
+          description: Duration of each session in minutes
+        researcherName:
+          type: string
+          description: Name of the lead researcher
+
+    Summary:
+      type: object
+      description: Aggregated statistics across all studies.
+      properties:
+        totalStudies:
+          type: integer
+          description: Total number of studies
+        averageParticipants:
+          type: number
+          description: Average number of participants across all studies
+        byMethodology:
+          type: object
+          description: Count of studies grouped by methodology
+          additionalProperties:
+            type: integer
+
+    Error:
+      type: object
+      description: Standard error response.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+        message:
+          type: string
+          description: Human-readable error message
